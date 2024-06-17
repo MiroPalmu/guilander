@@ -318,7 +318,7 @@ class wl_protocol:
     description: Optional[wl_description]
     interfaces: list[wl_interface]
 
-    def write_cxx_header(self):
+    def write_cxx_header(self, path_prefix: str = ""):
         content: str = f"// Generated from Wayland xml protocol: {self.name}\n\n"
 
         if self.description:
@@ -352,7 +352,7 @@ class wl_protocol:
         content += "} // namespace wl\n"
         content += "} // namespace ger\n"
 
-        filename = f"{self.name}_protocol.hpp"
+        filename = f"{path_prefix}{self.name}_protocol.hpp"
         with open(filename, "w") as file:
             file.write(content)
         print(f"{filename} created!")
@@ -592,9 +592,70 @@ def parse_wayland_xml(xml: bytes):
     remove_comment_nodes(root)
     return parse_wl_protocol(root)
 
-if __name__ == "__main__":
-    # test_address = "https://gitlab.freedesktop.org/wayland/wayland/-/raw/main/protocol/tests.xml?ref_type=heads&inline=false"
-    # parse_wayland_xml(get_wayland_xml(test_address)).write_cxx_header()
+def main(argv0: str, argv_rest: list[str], temp_dir: str):
+    import argparse
+    parser  = argparse.ArgumentParser(
+                prog=argv0,
+        description="""    - clones wayland-protocols repo to "${TMPDIR:-/tmp}"
+    - parses xml from the repo
+    - generates Guilander protocol headers
 
-    wayland_xml_address = "https://gitlab.freedesktop.org/wayland/wayland/-/raw/main/protocol/wayland.xml?ref_type=heads&inline=false"
-    parse_wayland_xml(get_wayland_xml(wayland_xml_address)).write_cxx_header()
+    If $TMPDIR is not usable defaults to /tmp""",
+                exit_on_error=True,
+                formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "-p", "--protocol-dir",
+        type=str,
+        metavar="[un]stable|staging",
+        choices=["stable", "staging", "unstable"],
+        default=["stable", "staging", "unstable"],
+        nargs="*",
+        help="Subdirectory in wayland-protocols repo.",
+    )
+
+    parser.add_argument(
+        "destination-dir",
+        type=str,
+        help="Path of a destination directory for the generated Guilander headers.",
+    )
+
+    parser.add_argument(
+        "--alt-wayland-address",
+        metavar="address",
+        type=str,
+        default="https://gitlab.freedesktop.org/wayland/wayland.git",
+        help="Alternative address to clone wayland from."
+    )
+
+    parser.add_argument(
+        "--alt-wayland-protocols-address",
+        metavar="address",
+        type=str,
+        default="https://gitlab.freedesktop.org/wayland/wayland-protocols.git",
+        help="Alternative address to clone wayland-protocols from."
+    )
+
+    cmd_args = vars(parser.parse_args(argv_rest))
+    protocol_dirs = cmd_args["protocol_dir"] 
+    dst_dir_path = cmd_args["destination-dir"]
+
+    wl_address = cmd_args["alt_wayland_address"]
+    wl_protocols_address = cmd_args["alt_wayland_protocols_address"]
+
+    import git
+    def parse_protocols_from_repo(git_pathspec: str, repo: git.Repo):
+        tree_at_head = repo.head.commit.tree
+        for path_in_repo in repo.git.ls_files([git_pathspec]).splitlines():
+            xml = tree_at_head[path_in_repo].data_stream.read()
+            parse_wayland_xml(xml).write_cxx_header(path_prefix=dst_dir_path + "/")
+
+    import tempfile
+    with tempfile.TemporaryDirectory(dir=temp_dir) as temp_dir:
+
+        wl_repo = git.Repo.clone_from(wl_address, temp_dir + "/wayland", progress=h)
+        parse_protocols_from_repo("protocol/wayland.xml", wl_repo)
+
+        wl_protocols_repo = git.Repo.clone_from(wl_protocols_address, temp_dir + "/wayland-protocols")
+        for protocol_dir in protocol_dirs:
+            parse_protocols_from_repo(f"{protocol_dir}/*.xml", wl_protocols_repo)
