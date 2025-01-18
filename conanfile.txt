@@ -1,0 +1,7 @@
+[requires]
+mp-units/2.4.0
+mdspan/0.6.0
+
+[generators]
+PkgConfigDeps
+MesonToolchain

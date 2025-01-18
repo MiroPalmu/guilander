@@ -20,7 +20,6 @@ project(
     meson_version: '>= 1.4.0',
     default_options : [
       'warning_level=3',
-      'werror=true',
       'cpp_std=c++26',
     ],
 )
@@ -38,16 +37,28 @@ guilander_source_files = []
 subdir('docs')
 subdir('src')
 
+cpp = meson.get_compiler('cpp')
+
 guilander_lib = static_library(
     'guilander',
     guilander_source_files,
     include_directories : include_directories('include'),
-    dependencies : [waylander_dep],
+    dependencies : [
+        waylander_dep,
+        dependency('freetype2'),
+        dependency('mdspan'),
+        dependency('mp-units'),
+        cpp.find_library('unistring'),
+    ],
 )
 
 guilander_dep = declare_dependency(
     include_directories : include_directories('include'),
     link_with : guilander_lib,
+    dependencies : [
+        dependency('mp-units'),
+        dependency('mdspan'),
+    ],
 )
 
 if not meson.is_subproject()
