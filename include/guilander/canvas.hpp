@@ -27,4 +27,34 @@ concept writable_canvas = canvas<Canvas>
                           and std::assignable_from<typename Canvas::accessor_type::reference,
                                                    typename Canvas::value_type>;
 
+struct canvas_anchor {
+    std::ptrdiff_t i, j;
+};
+
+template<canvas Canvas>
+struct canvas_n_anchor {
+    Canvas        canvas;
+    canvas_anchor anchor;
+
+    [[nodiscard]] constexpr std::ptrdiff_t
+    extent_right(this auto&& self) {
+        return std::saturate_cast<std::ptrdiff_t>(self.canvas.extent(1)) - self.anchor.j - 1;
+    }
+
+    [[nodiscard]] constexpr std::ptrdiff_t
+    extent_left(this auto&& self) {
+        return std::saturate_cast<std::ptrdiff_t>(self.anchor.j);
+    }
+
+    [[nodiscard]] constexpr std::ptrdiff_t
+    extent_up(this auto&& self) {
+        return std::saturate_cast<std::ptrdiff_t>(self.anchor.i);
+    }
+
+    [[nodiscard]] constexpr std::ptrdiff_t
+    extent_down(this auto&& self) {
+        return std::saturate_cast<std::ptrdiff_t>(self.canvas.extent(0)) - self.anchor.i - 1;
+    }
+};
+
 } // namespace guilander
