@@ -23,6 +23,7 @@ test_dependencies += guilander_dep
 unit_tests = [
     'test_unit_test',
     'test_sstd_mdspan',
+    'test_canvas_concepts',
 ]
 
 test_names_and_exes = {}
