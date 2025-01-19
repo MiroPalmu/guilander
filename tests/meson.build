@@ -22,6 +22,7 @@ test_dependencies += guilander_dep
 # List of tests that can run in parallel
 unit_tests = [
     'test_unit_test',
+    'test_sstd_mdspan',
 ]
 
 test_names_and_exes = {}
