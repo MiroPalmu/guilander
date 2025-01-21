@@ -25,6 +25,7 @@ unit_tests = [
     'test_sstd_mdspan',
     'test_canvas_concepts',
     'test_canvas_anchor',
+    'test_canvas_stamp',
 ]
 
 test_names_and_exes = {}
