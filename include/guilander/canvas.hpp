@@ -29,7 +29,17 @@ concept writable_canvas = canvas<Canvas>
 
 struct canvas_anchor {
     std::ptrdiff_t i, j;
+
+    [[nodiscard]] friend constexpr bool
+    operator==(const canvas_anchor, const canvas_anchor) = default;
 };
+
+/// Transform \x and \p from such that \p from becomes \p to and return transformed \p x.
+[[nodiscard]] constexpr canvas_anchor
+anchor_transform(const canvas_anchor x, const canvas_anchor from, const canvas_anchor to) {
+    const auto relative_x = canvas_anchor{ x.i - from.i, x.j - from.j };
+    return { to.i + relative_x.i, to.j + relative_x.j };
+}
 
 template<canvas Canvas>
 struct canvas_n_anchor {

@@ -80,4 +80,63 @@ main() {
         expect(cna3.extent_right() == 2);
         expect(cna3.extent_left() == 1);
     };
+
+    tag("canvas") / "anchor_transform from a anchor to the same anchor is identity"_test = [] {
+        constexpr auto x = guilander::canvas_anchor{ -12, 10 };
+        constexpr auto y = guilander::canvas_anchor{ 1, 2 };
+
+        expect(guilander::anchor_transform(x, y, y) == x);
+        expect(guilander::anchor_transform(y, x, x) == y);
+    };
+
+    tag("canvas") / "anchor_transform of anchor from itself is the resulting anchor"_test = [] {
+        constexpr auto x = guilander::canvas_anchor{ -12, 10 };
+        constexpr auto y = guilander::canvas_anchor{ 1, 2 };
+
+        expect(guilander::anchor_transform(x, x, y) == y);
+        expect(guilander::anchor_transform(y, y, x) == x);
+        expect(guilander::anchor_transform(x, x, x) == x);
+        expect(guilander::anchor_transform(y, y, y) == y);
+    };
+
+    tag("canvas") / "roundtrip anchor_transform is identity"_test = [] {
+        constexpr auto x = guilander::canvas_anchor{ -12, 10 };
+        constexpr auto y = guilander::canvas_anchor{ 1, 2 };
+        constexpr auto z = guilander::canvas_anchor{ 13, -2 };
+
+        auto round_trip = [](const auto a, const auto b, const auto c) {
+            const auto a_from_b_to_c = guilander::anchor_transform(a, b, c);
+            return guilander::anchor_transform(a_from_b_to_c, c, b);
+        };
+
+        expect(round_trip(x, x, x) == x);
+        expect(round_trip(x, x, y) == x);
+        expect(round_trip(x, x, z) == x);
+        expect(round_trip(x, y, x) == x);
+        expect(round_trip(x, y, y) == x);
+        expect(round_trip(x, y, z) == x);
+        expect(round_trip(x, z, x) == x);
+        expect(round_trip(x, z, y) == x);
+        expect(round_trip(x, z, z) == x);
+
+        expect(round_trip(y, x, x) == y);
+        expect(round_trip(y, x, y) == y);
+        expect(round_trip(y, x, z) == y);
+        expect(round_trip(y, y, x) == y);
+        expect(round_trip(y, y, y) == y);
+        expect(round_trip(y, y, z) == y);
+        expect(round_trip(y, z, x) == y);
+        expect(round_trip(y, z, y) == y);
+        expect(round_trip(y, z, z) == y);
+
+        expect(round_trip(z, x, x) == z);
+        expect(round_trip(z, x, y) == z);
+        expect(round_trip(z, x, z) == z);
+        expect(round_trip(z, y, x) == z);
+        expect(round_trip(z, y, y) == z);
+        expect(round_trip(z, y, z) == z);
+        expect(round_trip(z, z, x) == z);
+        expect(round_trip(z, z, y) == z);
+        expect(round_trip(z, z, z) == z);
+    };
 }
