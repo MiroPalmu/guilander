@@ -58,6 +58,7 @@ guilander_dep = declare_dependency(
     dependencies : [
         dependency('mp-units'),
         dependency('mdspan'),
+        dependency('freetype2'),
     ],
 )
 
