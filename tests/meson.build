@@ -19,6 +19,10 @@ test_dependencies = []
 test_dependencies += dependency('ut')
 test_dependencies += guilander_dep
 
+test_env = [
+    'GUILANDER_TEST_TTF_FONT_PATH=' + files('ComicMono.ttf')[0].full_path(),
+]
+
 # List of tests that can run in parallel
 unit_tests = [
     'test_unit_test',
@@ -26,6 +30,7 @@ unit_tests = [
     'test_canvas_concepts',
     'test_canvas_anchor',
     'test_canvas_stamp',
+    'test_font',
 ]
 
 test_names_and_exes = {}
@@ -49,5 +54,6 @@ foreach test_name, test_exe : test_names_and_exes
         test_exe,
         is_parallel: true,
         timeout: 10,
+        env: test_env,
     )
 endforeach
