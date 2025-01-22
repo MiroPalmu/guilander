@@ -16,10 +16,13 @@
 #pragma once
 
 #include <algorithm>
+#include <concepts>
+#include <functional>
 #include <numeric>
 #include <print>
 #include <ranges>
 #include <stdexcept>
+#include <type_traits>
 
 #include "guilander/mdspan.hpp"
 
@@ -28,10 +31,11 @@ namespace guilander {
 template<typename Canvas>
 concept canvas = sstd::is_mdspan_v<Canvas> and (Canvas::extents_type::rank() == 2);
 
-template<typename Canvas>
-concept writable_canvas = canvas<Canvas>
-                          and std::assignable_from<typename Canvas::accessor_type::reference,
-                                                   typename Canvas::value_type>;
+template<typename Canvas, typename FromCanvas = Canvas, typename Proj = std::identity>
+concept writable_canvas = canvas<Canvas> and canvas<FromCanvas>
+                          and requires(Canvas::reference c, FromCanvas::reference fc, Proj&& p) {
+                                  c = std::invoke(std::forward<Proj>(p), fc);
+                              };
 
 struct canvas_anchor {
     std::ptrdiff_t i, j;
