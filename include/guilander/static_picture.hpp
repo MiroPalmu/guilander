@@ -37,13 +37,42 @@ struct static_picture {
     [[nodiscard]] static_picture(const int width_arg, const int height_arg);
 
     static constexpr auto color_format = waylander::wl::protocols::wl_shm::format::Eargb8888;
+
+    struct pixel_blend_over;
+
     struct pixel {
-        std::uint8_t blue{}, green{}, red{}, alpha{ 1 };
-        pixel(const std::uint8_t g) : green{ g } {}
-        pixel(const std::uint8_t b,
-              const std::uint8_t g,
-              const std::uint8_t r,
-              const std::uint8_t a)
+        std::uint8_t blue{}, green{}, red{}, alpha{};
+
+        constexpr std::tuple<float, float, float, float>
+        as_floats() const {
+            return { blue / 255., green / 255., red / 255., alpha / 255. };
+        };
+
+        static constexpr pixel
+        from_floats(const float b, const float g, const float r, const float a) {
+            return pixel{ static_cast<std::uint8_t>(255 * b),
+                          static_cast<std::uint8_t>(255 * g),
+                          static_cast<std::uint8_t>(255 * r),
+                          static_cast<std::uint8_t>(255 * a) };
+        }
+
+        constexpr pixel&
+        operator=(const pixel_blend_over A) {
+            const auto [Ab, Ag, Ar, Aa] = A.as_floats();
+            const auto [Bb, Bg, Br, Ba] = this->as_floats();
+
+            const auto new_alpha = Aa + Ba * (1 - Aa);
+            const auto new_blue  = (Ab * Aa + Bb * Ba * (1 - Aa)) / new_alpha;
+            const auto new_green = (Ag * Aa + Bg * Ba * (1 - Aa)) / new_alpha;
+            const auto new_red   = (Ar * Aa + Br * Ba * (1 - Aa)) / new_alpha;
+
+            return *this = pixel::from_floats(new_blue, new_green, new_red, new_alpha);
+        }
+
+        constexpr pixel(const std::uint8_t b,
+                        const std::uint8_t g,
+                        const std::uint8_t r,
+                        const std::uint8_t a)
             : blue{ b },
               green{ g },
               red{ r },
@@ -54,6 +83,10 @@ struct static_picture {
         debug_color() {
             return pixel{ 0, 0, 255, 255 };
         };
+    };
+
+    struct pixel_blend_over : public pixel {
+        using pixel::pixel;
     };
 
     struct pixel_coords {
