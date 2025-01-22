@@ -14,3 +14,4 @@
 # along with this file.  If not, see <https://www.gnu.org/licenses/>.
 
 guilander_source_files += files('font.cpp')
+guilander_source_files += files('mono_sort_set.cpp')

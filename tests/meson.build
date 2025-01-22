@@ -31,6 +31,7 @@ unit_tests = [
     'test_canvas_anchor',
     'test_canvas_stamp',
     'test_font',
+    'test_mono_sort_set',
 ]
 
 test_names_and_exes = {}
