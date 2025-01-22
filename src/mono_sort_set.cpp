@@ -83,8 +83,7 @@ mono_sort_set::as_sorts(const std::u8string_view str) -> std::generator<const so
                                       -hori_anchor.force_numerical_value_in(units::pixel) } };
         co_yield s;
 
-        const auto current_horizontal_advance =
-            std::ptrdiff_t{ glyph->advance.x } * units::pixel65536;
+        const auto current_horizontal_advance = std::ptrdiff_t{ glyph->advance.x } * units::pixel64;
         accumulated_horizontal_advance += current_horizontal_advance;
     }
 }
