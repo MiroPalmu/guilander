@@ -15,3 +15,4 @@
 
 guilander_source_files += files('font.cpp')
 guilander_source_files += files('mono_sort_set.cpp')
+guilander_source_files += files('static_picture.cpp')
