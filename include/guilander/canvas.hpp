@@ -37,7 +37,7 @@ struct canvas_anchor {
     std::ptrdiff_t i, j;
 
     [[nodiscard]] friend constexpr bool
-    operator==(const canvas_anchor, const canvas_anchor) = default;
+    operator==(const canvas_anchor&, const canvas_anchor&) = default;
 };
 
 /// Transform \x and \p from such that \p from becomes \p to and return transformed \p x.
