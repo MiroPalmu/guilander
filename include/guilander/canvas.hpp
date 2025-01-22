@@ -88,9 +88,10 @@ class canvas_n_anchor {
         return self.canvas_;
     }
 
-    template<canvas OtherCanvas>
+    template<canvas OtherCanvas, typename Proj = std::identity>
+        requires writable_canvas<Canvas, OtherCanvas, Proj>
     void
-    stamp(this auto& self, const canvas_n_anchor<OtherCanvas>& other) {
+    stamp(this auto& self, const canvas_n_anchor<OtherCanvas>& other, Proj proj = {}) {
         // In coordinates of other.
         const auto other_anchor = other.get_anchor();
 
@@ -131,7 +132,8 @@ class canvas_n_anchor {
         for (const auto [i, j] : rv::cartesian_product(vert_indecies, hori_indecies)) {
             const auto ij          = canvas_anchor{ i, j };
             const auto ij_in_other = anchor_transform(ij, self.anchor_, other_anchor);
-            self.canvas_[i, j]     = other.get_canvas()[ij_in_other.i, ij_in_other.j];
+            self.canvas_[i, j] =
+                std::invoke(proj, other.get_canvas()[ij_in_other.i, ij_in_other.j]);
         }
     }
 };

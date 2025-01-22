@@ -242,4 +242,58 @@ main() {
         cnaA.stamp(cnaB3);
         expect(std::ranges::equal(buffA, original)) << format_canvas(canvasA, og_mds);
     };
+
+    tag("canvas") / "canvas_n_anchor::stamp works with implicit conversions"_test = [] {
+        struct Bar {
+            int value;
+            constexpr Bar(const int x) : value{ x } {}
+            constexpr bool
+            operator==(const Bar&) const = default;
+        };
+
+        Bar        bar_buff[]{ { 0 }, { 1 }, { 2 }, { 3 } };
+        const auto bar_canvas = stdex::mdspan(bar_buff, 2, 2);
+        const auto bar_cna    = guilander::canvas_n_anchor{ bar_canvas, { 0, 0 } };
+
+        static constexpr int int_buff[]{ 1, 2 };
+        constexpr const auto int_canvas = stdex::mdspan(int_buff, 1, 2);
+        constexpr const auto int_cna    = guilander::canvas_n_anchor{ int_canvas, { 0, 0 } };
+
+        constexpr Bar correct[]{ { 1 }, { 2 }, { 2 }, { 3 } };
+
+        expect(not std::ranges::equal(correct, bar_buff));
+        bar_cna.stamp(int_cna);
+        expect(std::ranges::equal(correct, bar_buff));
+    };
+
+    tag("canvas") / "canvas_n_anchor::stamp projections work with implicit conversions"_test = [] {
+        struct Foo {
+            int value;
+            explicit constexpr Foo(const int x) : value{ x } {}
+        };
+        struct Bar {
+            int value;
+            constexpr Bar(const Foo f) : value{ 10 * f.value } {}
+        };
+
+        auto make_bar = [](const int x) {
+            Bar b   = Foo{ 0 };
+            b.value = x;
+            return b;
+        };
+        Bar        bar_buff[]{ make_bar(0), make_bar(1), make_bar(2), make_bar(3) };
+        const auto bar_canvas = stdex::mdspan(bar_buff, 2, 2);
+        const auto bar_cna    = guilander::canvas_n_anchor{ bar_canvas, { 0, 0 } };
+
+        static constexpr int int_buff[]{ 1, 2 };
+        constexpr const auto int_canvas = stdex::mdspan(int_buff, 1, 2);
+        constexpr const auto int_cna    = guilander::canvas_n_anchor{ int_canvas, { 0, 0 } };
+
+        auto to_foo = [](const int x) { return Foo{ x }; };
+        bar_cna.stamp(int_cna, to_foo);
+        expect(bar_buff[0].value == 10);
+        expect(bar_buff[1].value == 20);
+        expect(bar_buff[2].value == 2);
+        expect(bar_buff[3].value == 3);
+    };
 }
