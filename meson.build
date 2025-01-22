@@ -56,6 +56,7 @@ guilander_dep = declare_dependency(
     include_directories : include_directories('include'),
     link_with : guilander_lib,
     dependencies : [
+        waylander_dep,
         dependency('mp-units'),
         dependency('mdspan'),
         dependency('freetype2'),
