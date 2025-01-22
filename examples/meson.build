@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this file.  If not, see <https://www.gnu.org/licenses/>.
 
-single_source_examples = []
+single_source_examples = files('mono_text.cpp')
 
 fs = import('fs')
 
@@ -25,7 +25,7 @@ foreach example_source : single_source_examples
     executable(
         example_name,
         example_source,
-        dependencies: [waylander_dep],
+        dependencies: [guilander_dep],
     )
     example_ordinal += 1
 endforeach
