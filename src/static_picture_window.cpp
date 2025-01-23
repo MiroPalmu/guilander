@@ -14,8 +14,9 @@
 // along with this file.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdlib>
+#include <format>
 #include <optional>
-#include <print>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -36,14 +37,16 @@ static_picture_window::fatal_error_overloads_() -> waylander::wl::message_overlo
                 default: return "non-global error";
             }
         }();
-        std::println("Received global display object error event:");
-        std::println("    object id: {}", err.object_id.value);
-        std::println("    error type: {}", err_type_str);
-        // wonky stuff:
-        std::println("    desc: {}",
-                     std::string_view(reinterpret_cast<char const*>(err.message.data()),
-                                      err.message.size()));
-        std::exit(1);
+
+        throw std::runtime_error{ std::format(
+            "Received global display object error event:\n"
+            "    object id: {}\n"
+            "    error type: {}\n"
+            "    desc: {}\n",
+            err.object_id.value,
+            err_type_str,
+            std::string_view(reinterpret_cast<char const*>(err.message.data()),
+                             err.message.size())) };
     });
     return vis;
 }
@@ -101,12 +104,12 @@ static_picture_window::default_overloads_() -> waylander::wl::message_overload_s
 
     client_.recv_and_visit_events(globals_binder).until<wl_callback_done>(sync_obj_id_);
     if (not(wl_shm_found and wl_compositor_found and xdg_wm_base_found)) {
-        std::println("fatal error: not all wanted globals found!");
-        std::println("found (wl_shm, wl_compositor, xdg_wm_base): ({}, {}, {})",
-                     wl_shm_found,
-                     wl_compositor_found,
-                     xdg_wm_base_found);
-        std::exit(1);
+        throw std::runtime_error{ std::format(
+            "All wanted globals not found!\n"
+            "Found (wl_shm, wl_compositor, xdg_wm_base): ({}, {}, {})\n",
+            wl_shm_found,
+            wl_compositor_found,
+            xdg_wm_base_found) };
     }
     client_.flush_registered_requests();
 
