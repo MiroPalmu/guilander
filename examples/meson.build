@@ -16,6 +16,7 @@
 single_source_examples = files(
     'mono_text.cpp',
     'minimal_window.cpp',
+    'multiple_windows.cpp',
 )
 
 fs = import('fs')
