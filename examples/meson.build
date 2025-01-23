@@ -13,7 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this file.  If not, see <https://www.gnu.org/licenses/>.
 
-single_source_examples = files('mono_text.cpp')
+single_source_examples = files(
+    'mono_text.cpp',
+    'minimal_window.cpp',
+)
 
 fs = import('fs')
 
