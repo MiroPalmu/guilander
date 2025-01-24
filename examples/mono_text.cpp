@@ -43,7 +43,7 @@ main() {
     // Construct a static picture and fill it with black.
     auto picture = guilander::static_picture(800, 800);
     for (const auto pic_mds = picture.view_mdpixels();
-         const auto [i, j] : guilander::sstd::cartesian_iota(pic_mds)) {
+         const auto [i, j] : guilander::sstd::mdindices(pic_mds)) {
         pic_mds[i, j] = guilander::static_picture::pixel{ { 255 }, { 255 }, { 255 }, { 255 } };
     }
 
@@ -78,7 +78,6 @@ main() {
 
         for (const auto cna : sort_set.as_sorts(u8text)) { text_cna.stamp(cna, blend); }
     }
-
 
     h_tot = 250;
     for (int w = 20; w < 500; w *= 2) {

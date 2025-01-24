@@ -27,7 +27,7 @@ main() {
         auto picture = guilander::static_picture(50, 50);
 
         for (const auto pic_mds = picture.view_mdpixels();
-             const auto [i, j] : guilander::sstd::cartesian_iota(pic_mds)) {
+             const auto [i, j] : guilander::sstd::mdindices(pic_mds)) {
             pic_mds[i, j] =
                 guilander::static_picture::pixel{ { static_cast<std::uint8_t>(10 * j % 255) },
                                                   { static_cast<std::uint8_t>(20 * i % 255) },

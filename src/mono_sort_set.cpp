@@ -69,7 +69,7 @@ mono_sort_set::as_sorts(const std::u8string_view str) -> std::generator<const so
         glyph_buffer.resize(glyph_width * glyph_rows);
         const auto glyph_buffer_mdspan = canvas_type(glyph_buffer.data(), glyph_rows, glyph_width);
 
-        for (const auto [i, j] : sstd::cartesian_iota(glyph_buffer_mdspan)) {
+        for (const auto [i, j] : sstd::mdindices(glyph_buffer_mdspan)) {
             const auto bitmap_offset  = i * pitch + j;
             glyph_buffer_mdspan[i, j] = *std::ranges::next(glyph->bitmap.buffer, bitmap_offset);
         }

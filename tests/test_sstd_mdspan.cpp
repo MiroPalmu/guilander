@@ -58,25 +58,23 @@ main() {
         expect(guilander::sstd::is_mdspan_v<mdspanX>);
     };
 
-    tag("sstd") / "cartesian_iota does not skip any indecies"_test = [] {
+    tag("sstd") / "mdindices does not skip any indecies"_test = [] {
         auto buff = std::array<int, 8>{};
 
         const auto mdspan1D = stdex::mdspan(buff.data(), 8);
         const auto mdspan2D = stdex::mdspan(buff.data(), 2, 4);
         const auto mdspan3D = stdex::mdspan(buff.data(), 2, 2, 2);
 
-        for (const auto [i] : guilander::sstd::cartesian_iota(mdspan1D)) { mdspan1D[i] = i; }
+        for (const auto [i] : guilander::sstd::mdindices(mdspan1D)) { mdspan1D[i] = i; }
         expect(buff == std::array{ 0, 1, 2, 3, 4, 5, 6, 7 });
 
-        for (const auto [i, j] : guilander::sstd::cartesian_iota(mdspan2D)) {
-            mdspan2D[i, j] = i + j;
-        }
+        for (const auto [i, j] : guilander::sstd::mdindices(mdspan2D)) { mdspan2D[i, j] = i + j; }
         // clang-format off
         expect(buff == std::array{ 0 + 0, 0 + 1, 0 + 2, 0 + 3,
                                    1 + 0, 1 + 1, 1 + 2, 1 + 3 });
         //clang-format on
 
-        for (const auto [i, j, k] : guilander::sstd::cartesian_iota(mdspan3D)) {
+        for (const auto [i, j, k] : guilander::sstd::mdindices(mdspan3D)) {
             mdspan3D[i, j, k] = i + j + k;
         }
 

@@ -37,7 +37,7 @@ static constexpr bool is_mdspan_v = is_mdspan<T>::value;
 template<typename MDS>
     requires is_mdspan_v<MDS>
 constexpr std::ranges::view auto
-cartesian_iota(const MDS& mds) {
+mdindices(const MDS& mds) {
     const auto make_iota_for_rank = [extents = mds.extents()]<MDS::rank_type Rank>() {
         return std::views::iota(typename MDS::index_type{}, extents.extent(Rank));
     };
