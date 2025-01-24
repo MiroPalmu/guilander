@@ -118,7 +118,7 @@ struct static_picture {
 
     [[nodiscard]] auto
     view_mdpixels() -> mdpixels {
-        return mdpixels(reinterpret_cast<pixel*>(bytes.data()), width, height);
+        return mdpixels(reinterpret_cast<pixel*>(bytes.data()), height, width);
     }
 };
 
