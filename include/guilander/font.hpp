@@ -17,6 +17,8 @@
 
 #include <concepts>
 #include <filesystem>
+#include <optional>
+#include <string>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -29,10 +31,17 @@
 namespace guilander {
 namespace fc {
 
-void
-print_available_fonts();
+struct font_properties {
+    bool                       monospace   = false;
+    bool                       scalable    = false;
+    std::optional<std::string> family_name = {};
+    std::optional<std::string> style       = {};
+};
 
-}
+void
+print_available_fonts(const font_properties = {});
+
+} // namespace fc
 
 namespace ft2 {
 

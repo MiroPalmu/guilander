@@ -72,7 +72,7 @@ make_fontconfig_pattern() {
 auto
 build_fontconfig_objectset() {
     return std::unique_ptr<FcObjectSet, decltype(&::FcObjectSetDestroy)>(
-        ::FcObjectSetBuild(FC_FAMILY, FC_STYLE, FC_FILE, FC_SPACING, FC_EMBEDDED_BITMAP, (char*)0),
+        ::FcObjectSetBuild(FC_FAMILY, FC_STYLE, FC_FILE, FC_SPACING, FC_SCALABLE, (char*)0),
         &::FcObjectSetDestroy);
 }
 
@@ -86,10 +86,21 @@ get_fontconfig_fontlist(auto* const conf, auto* const pat, auto* const objset) {
 } // namespace
 
 namespace guilander::fc {
+
 void
-print_available_fonts() {
-    auto&      conf   = get_fontconfig_config();
-    const auto pat    = make_fontconfig_pattern();
+print_available_fonts(const font_properties properties) {
+    auto&      conf = get_fontconfig_config();
+    const auto pat  = make_fontconfig_pattern();
+    if (properties.monospace) { ::FcPatternAddInteger(pat.get(), FC_SPACING, FC_MONO); }
+    if (properties.scalable) { ::FcPatternAddBool(pat.get(), FC_SCALABLE, FcTrue); }
+    if (properties.family_name) {
+        ::FcPatternAddString(pat.get(),
+                             FC_FAMILY,
+                             (const FcChar8*)properties.family_name.value().c_str());
+    }
+    if (properties.style) {
+        ::FcPatternAddString(pat.get(), FC_STYLE, (const FcChar8*)properties.style.value().c_str());
+    }
     const auto objset = build_fontconfig_objectset();
     const auto fonts  = get_fontconfig_fontlist(&conf, pat.get(), objset.get());
     ::FcFontSetPrint(fonts.get());
