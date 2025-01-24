@@ -91,7 +91,7 @@ class canvas_n_anchor {
     template<canvas OtherCanvas, typename Proj = std::identity>
         requires writable_canvas<Canvas, OtherCanvas, Proj>
     void
-    stamp(this auto& self, const canvas_n_anchor<OtherCanvas>& other, Proj proj = {}) {
+    stamp(this auto&& self, const canvas_n_anchor<OtherCanvas>& other, Proj proj = {}) {
         // In coordinates of other.
         const auto other_anchor = other.get_anchor();
 
