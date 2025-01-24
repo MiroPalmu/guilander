@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "guilander/font.hpp"
+#include "guilander/mdspan.hpp"
 #include "guilander/mono_sort_set.hpp"
 #include "guilander/static_picture.hpp"
 #include "guilander/static_picture_window.hpp"
@@ -41,8 +42,9 @@ main() {
 
     // Construct a static picture and fill it with black.
     auto picture = guilander::static_picture(800, 800);
-    for (const auto [coords, pixel] : picture.view_pixels()) {
-        pixel = guilander::static_picture::pixel{ { 255 }, { 255 }, { 255 }, { 255 } };
+    for (const auto pic_mds = picture.view_mdpixels();
+         const auto [i, j] : guilander::sstd::cartesian_iota(pic_mds)) {
+        pic_mds[i, j] = guilander::static_picture::pixel{ { 255 }, { 255 }, { 255 }, { 255 } };
     }
 
     const auto blend = [](const std::uint8_t n) {

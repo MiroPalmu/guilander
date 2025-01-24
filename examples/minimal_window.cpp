@@ -15,17 +15,19 @@
 
 #include <utility>
 
+#include "guilander/mdspan.hpp"
 #include "guilander/static_picture.hpp"
 #include "guilander/static_picture_window.hpp"
 
 int
 main() {
-    auto picture = guilander::static_picture(50, 50);
+    auto picture     = guilander::static_picture(50, 50);
+    auto picture_mds = picture.view_mdpixels();
 
-    for (const auto [coords, pixel] : picture.view_pixels()) {
-        pixel =
-            guilander::static_picture::pixel{ { static_cast<std::uint8_t>(10 * coords.x % 255) },
-                                              { static_cast<std::uint8_t>(20 * coords.y % 255) },
+    for (const auto [i, j] : guilander::sstd::cartesian_iota(picture_mds)) {
+        picture_mds[i, j] =
+            guilander::static_picture::pixel{ { static_cast<std::uint8_t>(10 * j % 255) },
+                                              { static_cast<std::uint8_t>(20 * i % 255) },
                                               {},
                                               { 255 } };
     }

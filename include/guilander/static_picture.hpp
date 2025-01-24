@@ -89,35 +89,15 @@ struct static_picture {
         using pixel::pixel;
     };
 
-    struct pixel_coords {
-        int x, y;
-    };
+    using mdpixels = stdex::mdspan<pixel, stdex::dextents<std::size_t, 2>>;
 
-    using pixel_view_type = std::tuple<pixel_coords, pixel&>;
-
-    [[nodiscard]] std::ranges::view auto
-    view_pixels() {
-        namespace rv = std::ranges::views;
-
+    [[nodiscard]] auto
+    view_mdpixels() -> mdpixels {
 #ifdef __cpp_lib_is_implicit_lifetime
         static_assert(std::is_implicit_lifetime_v<pixel>);
 #endif
         static_assert(std::alignment_of_v<pixel> == std::alignment_of_v<std::byte>);
         static_assert(sizeof(pixel) == sizeof(std::uint32_t));
-
-        return bytes | rv::chunk(4) | rv::enumerate | rv::transform([&](auto index_bgra_tuple) {
-                   const auto index       = static_cast<int>(std::get<0>(index_bgra_tuple));
-                   const auto x           = index % width;
-                   const auto y           = index / width;
-                   auto       pixel_begin = std::get<1>(index_bgra_tuple).begin();
-                   return pixel_view_type{ { x, y }, reinterpret_cast<pixel&>(*pixel_begin) };
-               });
-    }
-
-    using mdpixels = stdex::mdspan<pixel, stdex::dextents<std::size_t, 2>>;
-
-    [[nodiscard]] auto
-    view_mdpixels() -> mdpixels {
         return mdpixels(reinterpret_cast<pixel*>(bytes.data()), height, width);
     }
 };
