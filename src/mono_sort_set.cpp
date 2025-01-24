@@ -57,7 +57,6 @@ mono_sort_set::as_sorts(const std::u8string_view str) -> std::generator<const so
     for (auto x_it = u32_sv.begin(); x_it != u32_sv.end(); ++x_it) {
         auto& x = *x_it;
 
-        font_.set_size(sort_width_, sort_height_);
         const auto& glyph = font_.get_rendered_glyph(x);
         if (glyph->format != FT_GLYPH_FORMAT_BITMAP) {
             throw std::logic_error{
@@ -91,10 +90,9 @@ mono_sort_set::as_sorts(const std::u8string_view str) -> std::generator<const so
     }
 }
 
-void
+ft2::font_metrics
 mono_sort_set::set_size(const ft2::pixel_uint width, const ft2::pixel_uint height) {
-    this->sort_width_  = width;
-    this->sort_height_ = height;
+    return font_.set_size(width, height);
 }
 
 } // namespace guilander

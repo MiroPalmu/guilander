@@ -47,6 +47,13 @@ namespace ft2 {
 
 using pixel_uint = mp_units::quantity<units::pixel, FT_UInt>;
 
+struct font_metrics {
+    units::pixel64_ptrdiff_t ascender;
+    units::pixel64_ptrdiff_t descender;
+    units::pixel64_ptrdiff_t height_between_baselines;
+    units::pixel64_ptrdiff_t max_advance;
+};
+
 class font {
     FT_Face face_;
 
@@ -54,7 +61,7 @@ class font {
     [[nodiscard]] explicit font(const std::filesystem::path font_file);
     [[nodiscard]] explicit font(const fc::font_properties);
 
-    void
+    font_metrics
     set_size(const pixel_uint width, const pixel_uint height);
 
     const FT_GlyphSlot&

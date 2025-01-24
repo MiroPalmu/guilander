@@ -34,7 +34,7 @@ class mono_sort_set {
     [[nodiscard]] explicit mono_sort_set(const std::filesystem::path font_file);
     [[nodiscard]] explicit mono_sort_set(const fc::font_properties);
 
-    void
+    ft2::font_metrics
     set_size(const ft2::pixel_uint width, const ft2::pixel_uint height);
 
     using canvas_type = stdex::mdspan<std::uint8_t, stdex::dextents<std::size_t, 2>>;

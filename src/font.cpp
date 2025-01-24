@@ -170,13 +170,17 @@ namespace guilander::ft2 {
     }
 }
 
-void
+font_metrics
 font::set_size(const guilander::ft2::pixel_uint width, const guilander::ft2::pixel_uint height) {
     const auto w = width.numerical_value_in(guilander::units::pixel);
     const auto h = height.numerical_value_in(guilander::units::pixel);
     if (FT_Set_Pixel_Sizes(face_, w, h)) {
         throw std::runtime_error("FT_Set_Pixel_Sizes failed due to unknown error.");
     }
+    return font_metrics{ .ascender  = face_->size->metrics.ascender * units::pixel64,
+                         .descender = face_->size->metrics.descender * units::pixel64,
+                         .height_between_baselines = face_->size->metrics.height * units::pixel64,
+                         .max_advance = face_->size->metrics.max_advance * units::pixel64 };
 }
 
 const FT_GlyphSlot&
