@@ -20,6 +20,7 @@ single_source_examples = files(
     'minimal_window.cpp',
     'multiple_windows.cpp',
     'list_fontconfig_fonts.cpp',
+    'fontconfig.cpp',
 )
 
 fs = import('fs')
