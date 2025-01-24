@@ -14,6 +14,7 @@
 // along with this file.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
+#include <chrono>
 #include <cstdlib>
 #include <fstream>
 #include <numeric>
@@ -21,6 +22,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -34,26 +36,26 @@
 void
 err() {
     std::println("Invalid arguments!");
-    std::println("usage: text_overlay <font_width> <font_height> <path>");
+    std::println("usage: text_overlay <font_width> <font_height> <time_visible_in_ms>");
     std::exit(1);
 }
 
 int
 main(const int argc, const char** argv) {
-    if (argc != 4) { err(); }
+    if (argc != 5) { err(); }
 
     auto args = std::stringstream{};
-    args << argv[1] << " " << argv[2];
+    args << argv[1] << " " << argv[2] << " " << argv[3];
 
-    std::size_t w, h;
-    args >> w >> h;
+    std::size_t w, h, t;
+    args >> w >> h >> t;
 
     // Set text size with sort_set.
     auto sort_set = guilander::mono_sort_set(guilander::fc::font_properties{ .monospace = true });
     const auto metrics =
         sort_set.set_size(w * guilander::units::pixel, h * guilander::units::pixel);
 
-    auto text_stream = std::ifstream(argv[3], std::ios::binary);
+    auto text_stream = std::ifstream(argv[4], std::ios::binary);
     auto lines       = std::vector<std::string>{};
     for (std::string line; std::getline(text_stream, line);) { lines.push_back(line); }
 
@@ -71,7 +73,7 @@ main(const int argc, const char** argv) {
 
     for (const auto pic_mds = picture.view_mdpixels();
          const auto [i, j] : guilander::sstd::mdindices(pic_mds)) {
-        pic_mds[i, j] = guilander::static_picture::pixel{ { 50 }, { 50 }, { 50 }, { 200 } };
+        pic_mds[i, j] = guilander::static_picture::pixel{ { 50 }, { 50 }, { 50 }, { 250 } };
     }
 
     const auto blend = [](const std::uint8_t n) {
@@ -91,6 +93,6 @@ main(const int argc, const char** argv) {
         base_line += metrics.height_between_baselines;
     }
 
-    auto overlay = guilander::static_picture_overlay(std::move(picture));
-    overlay.wait_for_close_event();
+    auto _ = guilander::static_picture_overlay(std::move(picture));
+    std::this_thread::sleep_for(std::chrono::milliseconds(t));
 }
