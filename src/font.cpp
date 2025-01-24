@@ -83,6 +83,31 @@ get_fontconfig_fontlist(auto* const conf, auto* const pat, auto* const objset) {
         &::FcFontSetDestroy);
 }
 
+auto
+fontconfig_match_font(auto* const conf, auto* const pat) {
+    ::FcResult  result;
+    auto* const ret_pat = ::FcFontMatch(conf, pat, &result);
+    switch (result) {
+        case ::FcResultMatch: break;
+        case ::FcResultNoMatch:
+            throw std::runtime_error{ "FcFontMatch error: Object doesn't exist at all" };
+        case ::FcResultTypeMismatch:
+            throw std::runtime_error{
+                "FcFontMatch error: Object exists, but the type doesn't match"
+            };
+        case ::FcResultNoId:
+            throw std::runtime_error{
+                "FcFontMatch error: Object exists, but has fewer values than specified"
+            };
+        case ::FcResultOutOfMemory: throw std::runtime_error{ "FcFontMatch error: malloc failed" };
+        default: throw std::logic_error{ "FcFontMatch unexpected error!" };
+    }
+    if (not ret_pat) { throw std::logic_error{ "FcFontMatch gave no error, but returned null!" }; }
+
+    return std::unique_ptr<::FcPattern, decltype(&::FcPatternDestroy)>(ret_pat,
+                                                                       &::FcPatternDestroy);
+}
+
 } // namespace
 
 namespace guilander::fc {
@@ -113,6 +138,36 @@ namespace guilander::ft2 {
 [[nodiscard]] font::font(const std::filesystem::path font_file)
     : face_{ load_font_face(font_file) } {
     if (not FT_IS_SCALABLE(face_)) { throw std::runtime_error{ "Loaded font is not scalable!" }; }
+}
+
+[[nodiscard]] font::font(const fc::font_properties properties) {
+    auto&      conf = get_fontconfig_config();
+    const auto pat  = make_fontconfig_pattern();
+    if (properties.monospace) { ::FcPatternAddInteger(pat.get(), FC_SPACING, FC_MONO); }
+    if (properties.scalable) { ::FcPatternAddBool(pat.get(), FC_SCALABLE, FcTrue); }
+    if (properties.family_name) {
+        ::FcPatternAddString(pat.get(),
+                             FC_FAMILY,
+                             (const FcChar8*)properties.family_name.value().c_str());
+    }
+    if (properties.style) {
+        ::FcPatternAddString(pat.get(), FC_STYLE, (const FcChar8*)properties.style.value().c_str());
+    }
+    if (FcFalse == ::FcConfigSubstitute(&conf, pat.get(), FcMatchPattern)) {
+        throw std::runtime_error{ "FcConfigSubstitute failed!" };
+    }
+    ::FcDefaultSubstitute(pat.get());
+
+    const auto found_font = fontconfig_match_font(&conf, pat.get());
+
+    ::FcChar8* file_path = nullptr;
+    if (::FcPatternGetString(found_font.get(), FC_FILE, 0, &file_path) == FcResultMatch) {
+        face_ = load_font_face(std::string{ (const char*)file_path });
+    } else {
+        throw std::runtime_error{
+            "FcPatternGetString did not find path of font that was matched."
+        };
+    }
 }
 
 void

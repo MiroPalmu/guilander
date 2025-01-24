@@ -52,6 +52,7 @@ class font {
 
   public:
     [[nodiscard]] explicit font(const std::filesystem::path font_file);
+    [[nodiscard]] explicit font(const fc::font_properties);
 
     void
     set_size(const pixel_uint width, const pixel_uint height);

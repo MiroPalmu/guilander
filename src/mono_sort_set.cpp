@@ -28,6 +28,9 @@ namespace guilander {
 [[nodiscard]] mono_sort_set::mono_sort_set(const std::filesystem::path font_path)
     : font_{ ft2::font{ font_path } } {}
 
+[[nodiscard]] mono_sort_set::mono_sort_set(const fc::font_properties properties)
+    : font_{ ft2::font{ properties } } {}
+
 [[nodiscard]] auto
 mono_sort_set::as_sorts(const std::u8string_view str) -> std::generator<const sort_type&> {
     std::size_t str32_size;

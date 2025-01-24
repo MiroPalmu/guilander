@@ -32,6 +32,7 @@ class mono_sort_set {
 
   public:
     [[nodiscard]] explicit mono_sort_set(const std::filesystem::path font_file);
+    [[nodiscard]] explicit mono_sort_set(const fc::font_properties);
 
     void
     set_size(const ft2::pixel_uint width, const ft2::pixel_uint height);
