@@ -48,6 +48,7 @@ guilander_lib = static_library(
         dependency('freetype2'),
         dependency('mdspan'),
         dependency('mp-units'),
+        dependency('fontconfig'),
         cpp.find_library('unistring'),
     ],
 )
