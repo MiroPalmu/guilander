@@ -13,22 +13,82 @@
 // You should have received a copy of the GNU General Public License
 // along with this file.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <algorithm>
+#include <cstdlib>
+#include <fstream>
+#include <numeric>
+#include <print>
+#include <sstream>
+#include <string>
+#include <string_view>
 #include <utility>
+#include <vector>
 
+#include "guilander/font.hpp"
+#include "guilander/mono_sort_set.hpp"
 #include "guilander/static_picture.hpp"
+#include "guilander/static_picture_window.hpp"
 
 #include "static_picture_overlay.hpp"
 
-int
-main() {
-    auto picture = guilander::static_picture(50, 50);
+void
+err() {
+    std::println("Invalid arguments!");
+    std::println("usage: text_overlay <font_width> <font_height> <path>");
+    std::exit(1);
+}
 
-    for (const auto [coords, pixel] : picture.view_pixels()) {
-        pixel =
-            guilander::static_picture::pixel{ { static_cast<std::uint8_t>(10 * coords.x % 255) },
-                                              { static_cast<std::uint8_t>(20 * coords.y % 255) },
-                                              {},
-                                              { 255 } };
+int
+main(const int argc, const char** argv) {
+    if (argc != 4) { err(); }
+
+    auto args = std::stringstream{};
+    args << argv[1] << " " << argv[2];
+
+    std::size_t w, h;
+    args >> w >> h;
+
+    // Set text size with sort_set.
+    auto sort_set = guilander::mono_sort_set(guilander::fc::font_properties{ .monospace = true });
+    const auto metrics =
+        sort_set.set_size(w * guilander::units::pixel, h * guilander::units::pixel);
+
+    auto text_stream = std::ifstream(argv[3], std::ios::binary);
+    auto lines       = std::vector<std::string>{};
+    for (std::string line; std::getline(text_stream, line);) { lines.push_back(line); }
+
+    if (lines.empty()) return 1;
+
+    const auto max_width =
+        metrics.max_advance * std::ranges::max(lines, {}, &std::string::size).size()
+        + 5 * guilander::units::pixel;
+
+    const auto total_height = metrics.height_between_baselines * lines.size();
+
+    auto picture =
+        guilander::static_picture(max_width.force_numerical_value_in(guilander::units::pixel),
+                                  total_height.force_numerical_value_in(guilander::units::pixel));
+
+    for (const auto pic_mds = picture.view_mdpixels();
+         const auto [i, j] : guilander::sstd::mdindices(pic_mds)) {
+        pic_mds[i, j] = guilander::static_picture::pixel{ { 50 }, { 50 }, { 50 }, { 200 } };
+    }
+
+    const auto blend = [](const std::uint8_t n) {
+        return guilander::static_picture::pixel_blend_over{ 255, 255, 255, n };
+    };
+
+    auto base_line = 3 * metrics.height_between_baselines / 4;
+    for (const auto& line : lines) {
+        const auto u8line = std::u8string{ reinterpret_cast<const char8_t*>(line.data()) };
+        for (const auto cna : sort_set.as_sorts(u8line)) {
+            guilander::canvas_n_anchor{
+                picture.view_mdpixels(),
+                { base_line.force_numerical_value_in(guilander::units::pixel), 5 }
+            }
+                .stamp(cna, blend);
+        }
+        base_line += metrics.height_between_baselines;
     }
 
     auto overlay = guilander::static_picture_overlay(std::move(picture));
