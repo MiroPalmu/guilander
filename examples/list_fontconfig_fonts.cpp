@@ -13,43 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this file.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+#include "guilander/font.hpp"
 
-#include <concepts>
-#include <filesystem>
-
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
-#include <mp-units/framework.h>
-#include <mp-units/systems/typographic.h>
-
-#include "units.hpp"
-
-namespace guilander {
-namespace fc {
-
-void
-print_available_fonts();
-
+int
+main() {
+    guilander::fc::print_available_fonts();
 }
-
-namespace ft2 {
-
-using pixel_uint = mp_units::quantity<units::pixel, FT_UInt>;
-
-class font {
-    FT_Face face_;
-
-  public:
-    [[nodiscard]] explicit font(const std::filesystem::path font_file);
-
-    void
-    set_size(const pixel_uint width, const pixel_uint height);
-
-    const FT_GlyphSlot&
-    get_rendered_glyph(const FT_ULong charcode);
-};
-
-} // namespace ft2
-} // namespace guilander

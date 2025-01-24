@@ -14,8 +14,13 @@
 // along with this file.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <format>
+#include <memory>
 #include <print>
 #include <stdexcept>
+#include <string_view>
+#include <vector>
+
+#include <fontconfig/fontconfig.h>
 
 #include "guilander/font.hpp"
 
@@ -46,7 +51,51 @@ load_font_face(const std::filesystem::path font_file) {
     return face;
 }
 
+/// Singleton fontconfig config object.
+auto&
+get_fontconfig_config() {
+    static auto config =
+        std::unique_ptr<::FcConfig, void (*)(::FcConfig*)>(::FcInitLoadConfigAndFonts(),
+                                                           [](::FcConfig* c) noexcept {
+                                                               ::FcConfigDestroy(c);
+                                                               ::FcFini();
+                                                           });
+    return *config;
+}
+
+auto
+make_fontconfig_pattern() {
+    return std::unique_ptr<::FcPattern, decltype(&::FcPatternDestroy)>(::FcPatternCreate(),
+                                                                       &::FcPatternDestroy);
+}
+
+auto
+build_fontconfig_objectset() {
+    return std::unique_ptr<FcObjectSet, decltype(&::FcObjectSetDestroy)>(
+        ::FcObjectSetBuild(FC_FAMILY, FC_STYLE, FC_FILE, FC_SPACING, FC_EMBEDDED_BITMAP, (char*)0),
+        &::FcObjectSetDestroy);
+}
+
+auto
+get_fontconfig_fontlist(auto* const conf, auto* const pat, auto* const objset) {
+    return std::unique_ptr<::FcFontSet, decltype(&::FcFontSetDestroy)>(
+        ::FcFontList(conf, pat, objset),
+        &::FcFontSetDestroy);
+}
+
 } // namespace
+
+namespace guilander::fc {
+void
+print_available_fonts() {
+    auto&      conf   = get_fontconfig_config();
+    const auto pat    = make_fontconfig_pattern();
+    const auto objset = build_fontconfig_objectset();
+    const auto fonts  = get_fontconfig_fontlist(&conf, pat.get(), objset.get());
+    ::FcFontSetPrint(fonts.get());
+}
+
+} // namespace guilander::fc
 
 namespace guilander::ft2 {
 

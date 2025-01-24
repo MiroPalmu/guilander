@@ -19,6 +19,7 @@ single_source_examples = files(
     'mono_text.cpp',
     'minimal_window.cpp',
     'multiple_windows.cpp',
+    'list_fontconfig_fonts.cpp',
 )
 
 fs = import('fs')
