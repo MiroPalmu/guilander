@@ -19,12 +19,16 @@
 #include <fstream>
 #include <numeric>
 #include <print>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <thread>
 #include <utility>
 #include <vector>
+
+#include <uniconv.h>
+#include <uniwidth.h>
 
 #include "guilander/font.hpp"
 #include "guilander/mono_sort_set.hpp"
@@ -36,7 +40,7 @@
 void
 err() {
     std::println("Invalid arguments!");
-    std::println("usage: text_overlay <font_width> <font_height> <time_visible_in_ms>");
+    std::println("usage: wlr_text_overlay <font_width> <font_height> <time_visible_in_ms> <path>");
     std::exit(1);
 }
 
@@ -62,8 +66,13 @@ main(const int argc, const char** argv) {
     if (lines.empty()) return 1;
 
     const auto max_width =
-        metrics.max_advance * std::ranges::max(lines, {}, &std::string::size).size()
-        + 5 * guilander::units::pixel;
+        5 * guilander::units::pixel
+        + metrics.max_advance
+              * std::ranges::max(lines | std::views::transform([](const std::string& str) {
+                                     return ::u8_strwidth(
+                                         reinterpret_cast<const uint8_t*>(str.c_str()),
+                                         ::locale_charset());
+                                 }));
 
     const auto total_height = metrics.height_between_baselines * lines.size();
 
