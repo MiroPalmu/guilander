@@ -21,6 +21,7 @@ single_source_examples = files(
     'multiple_windows.cpp',
     'list_fontconfig_fonts.cpp',
     'fontconfig.cpp',
+    'interactive_window.cpp',
 )
 
 fs = import('fs')
