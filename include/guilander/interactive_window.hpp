@@ -152,6 +152,14 @@ class interactive_window {
                                 std::tuple{ dmg.x.value, dmg.x.value + dmg.width.value });
     };
 
+    [[nodiscard]] auto
+    damage_all() {
+        return damage({ .x      = 0,
+                        .y      = 0,
+                        .width  = user_buffer_.picture_.width,
+                        .height = user_buffer_.picture_.height });
+    };
+
     void
     commit();
 
