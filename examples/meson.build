@@ -22,6 +22,7 @@ single_source_examples = files(
     'list_fontconfig_fonts.cpp',
     'fontconfig.cpp',
     'interactive_window.cpp',
+    'interactive_mono_text.cpp',
 )
 
 fs = import('fs')
